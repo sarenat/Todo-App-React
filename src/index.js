@@ -9,13 +9,36 @@ const ListItem = (props) => (
   > {props.task} </li>
 )
 
-// class List extends React.Component {
-//   constructor(props) {
-//     super(props);
-//   }
-//   /* App will pass taskList and view. */
-//
-// }
+function ShowLists(props) {
+  console.log("_________________________")
+  var i;
+  for (i = 0; i < props.taskList.length; i++) {
+    props.taskList[i].map((todo, index) => {
+      console.log(todo.task);
+      return (<ListItem
+                key={index}
+                task={todo.task}
+                isComplete={todo.isComplete}
+                itemListNum={todo.itemListNum}
+                onClick={() => {this.checked(todo.itemListNum, index)}}
+              />)
+      // var returnValue = <ListItem
+      //                     key={index}
+      //                     task={todo.task}
+      //                     isComplete={todo.isComplete}
+      //                     itemListNum={todo.itemListNum}
+      //                     onClick={() => {this.checked(todo.itemListNum, index)}}
+      //                   />
+      // if(this.state.view === 0) {
+      //   return returnValue
+      // } else if (this.state.view === 1 && !todo.isComplete) {
+      //   return returnValue
+      // } else if (this.state.view === 2 && todo.isComplete) {
+      //   return returnValue
+      // }
+    })
+  }
+}
 
 class App extends React.Component {
   state = {
@@ -54,7 +77,7 @@ class App extends React.Component {
   }
 
   render() {
-    console.log(this.state);
+    // console.log(this.state);
 
     return (
       <div className="todoApp">
@@ -74,24 +97,12 @@ class App extends React.Component {
         <button onClick={this.newList}>New List</button>
 
         <ul>
-          {/* I tried putting this section into it's own function. Why didn't it work? */}
-          {this.state.taskList[0].map((todo, index) => {
-              var returnValue = <ListItem
-                                  key={index}
-                                  task={todo.task}
-                                  isComplete={todo.isComplete}
-                                  itemListNum={todo.itemListNum}
-                                  onClick={() => {this.checked(todo.itemListNum, index)}}
-                                />
-              if(this.state.view === 0) {
-                return returnValue
-              } else if (this.state.view === 1 && !todo.isComplete) {
-                return returnValue
-              } else if (this.state.view === 2 && todo.isComplete) {
-                return returnValue
-              }
-            })
-          }
+          <ShowLists
+            taskList={this.state.taskList}
+            view={this.state.view}
+            listNum={this.state.listNum}
+            checked={this.checked()}
+          />
         </ul>
       </div>
     );
