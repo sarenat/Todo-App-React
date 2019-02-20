@@ -9,37 +9,6 @@ const ListItem = (props) => (
   > {props.task} </li>
 )
 
-function ShowLists(props) {
-  console.log("_________________________")
-  var i;
-  for (i = 0; i < props.taskList.length; i++) {
-    props.taskList[i].map((todo, index) => {
-      console.log(todo.task);
-      return (<ListItem
-                key={index}
-                task={todo.task}
-                isComplete={todo.isComplete}
-                itemListNum={todo.itemListNum}
-                onClick={() => {this.checked(todo.itemListNum, index)}}
-              />)
-      // var returnValue = <ListItem
-      //                     key={index}
-      //                     task={todo.task}
-      //                     isComplete={todo.isComplete}
-      //                     itemListNum={todo.itemListNum}
-      //                     onClick={() => {this.checked(todo.itemListNum, index)}}
-      //                   />
-      // if(this.state.view === 0) {
-      //   return returnValue
-      // } else if (this.state.view === 1 && !todo.isComplete) {
-      //   return returnValue
-      // } else if (this.state.view === 2 && todo.isComplete) {
-      //   return returnValue
-      // }
-    })
-  }
-}
-
 class App extends React.Component {
   state = {
     taskList: [[]],
@@ -77,7 +46,7 @@ class App extends React.Component {
   }
 
   render() {
-    // console.log(this.state);
+    console.log(this.state);
 
     return (
       <div className="todoApp">
@@ -97,12 +66,26 @@ class App extends React.Component {
         <button onClick={this.newList}>New List</button>
 
         <ul>
-          <ShowLists
-            taskList={this.state.taskList}
-            view={this.state.view}
-            listNum={this.state.listNum}
-            checked={this.checked()}
-          />
+            { // BUG: CANNOT DISPLAY ENTIRE TASKLIST
+              //this.state.taskList.map((list, index1) => {
+              this.state.taskList[0].map((todo, index) => {
+                console.log(this.state);
+                var returnValue = <ListItem
+                                    key={todo.task.concat(index)}
+                                    task={todo.task}
+                                    isComplete={todo.isComplete}
+                                    onClick={() => {this.checked(todo.itemListNum, index)}}
+                                  />
+                if(this.state.view === 0) {
+                  return returnValue
+                } else if (this.state.view === 1 && !todo.isComplete) {
+                  return returnValue
+                } else if (this.state.view === 2 && todo.isComplete) {
+                  return returnValue
+                }
+              })
+             //})
+            }
         </ul>
       </div>
     );
