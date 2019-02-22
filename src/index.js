@@ -3,9 +3,16 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 class ListItem extends React.Component {
+  handleToggleIsComplete = (listNum, taskNum) => {
+    this.props.toggleIsComplete(listNum, taskNum);
+  }
+
   render() {
     return (
-      <li>
+      <li
+        style={{textDecoration: this.props.isComplete ? 'strike-through' : 'initial'}}
+        onClick={() => this.handleToggleIsComplete(
+          this.props.listNum, this.props.taskNum)}>
         {this.props.task}
       </li>
     );
@@ -13,13 +20,20 @@ class ListItem extends React.Component {
 }
 
 class List extends React.Component {
+  handleToggleIsComplete = (listNum, taskNum) => {
+    this.props.toggleIsComplete(listNum, taskNum);
+  }
+
   render() {
     const taskList = this.props.taskList.map((todo, index) =>
       <ListItem
         task={todo.task}
         key={index}
+        taskNum={index}
         listNum={todo.listNum}
-        isComplete={todo.isComplete} />
+        isComplete={todo.isComplete}
+        toggleIsComplete={this.handleToggleIsComplete}
+      />
     );
 
     return (
@@ -45,8 +59,7 @@ class AddTask extends React.Component {
       task: input,
       listNum: listNum,
       isComplete: false
-    }
-    console.log("im in AddTask! task: ", task);
+    };
     this.props.handleAddTask(task);
   }
 
@@ -69,8 +82,10 @@ class AddTask extends React.Component {
 
 class ListContainer extends React.Component {
   handleAddTask = task => {
-    console.log("im in ListContainer's handleAddTask: ", task);
     this.props.addTask(task);
+  }
+  handleToggleIsComplete = (listNum, taskNum) => {
+    this.props.toggleIsComplete(listNum, taskNum);
   }
 
   render() {
@@ -79,7 +94,9 @@ class ListContainer extends React.Component {
         <AddTask
           listNum={this.props.listNum}
           handleAddTask={this.handleAddTask} />
-        <List taskList={this.props.taskList} />
+        <List
+          taskList={this.props.taskList}
+          toggleIsComplete={this.handleToggleIsComplete} />
       </div>
     );
   }
@@ -99,7 +116,6 @@ class FilterButtons extends React.Component {
 
 class NewList extends React.Component {
   handleNewList = () => {
-    console.log("im in NewList's handleNewList!");
     this.props.addNewList();
   }
 
@@ -120,7 +136,6 @@ class App extends React.Component {
   }
 
   addTask = (task) => {
-    console.log("im in addTask! task: ", task, "taskListNum: ", task.listNum);
     let updatedTaskList = this.state.taskList.slice();
     updatedTaskList[task.listNum].push(task);
     this.setState({
@@ -133,7 +148,15 @@ class App extends React.Component {
     updatedTaskList.push([]);
     this.setState({
       taskList: updatedTaskList
-    })
+    });
+  }
+
+  toggleIsComplete = (listNum, taskNum) => {
+    let updatedTaskList = this.state.taskList.slice();
+    let updatedTask = updatedTaskList[listNum][taskNum];
+    updatedTask.isCompleted = !updatedTask.isCompleted;
+    this.setState({
+      taskList: updatedTaskList});
   }
 
   render() {
@@ -144,13 +167,14 @@ class App extends React.Component {
         key={index}
         taskList={list}
         listNum={index}
-        addTask={this.addTask} />
+        addTask={this.addTask}
+        toggleIsComplete={this.toggleIsComplete} />
     );
 
     return (
       <div className="App">
         <FilterButtons view={this.state.view} />
-        <NewList addNewList={() => this.addNewList()} />
+        <NewList addNewList={this.addNewList} />
         <br /> {/* why doesn't this work?? */}
         {lists}
       </div>
