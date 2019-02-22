@@ -10,7 +10,8 @@ class ListItem extends React.Component {
   render() {
     return (
       <li
-        style={{textDecoration: this.props.isComplete ? 'line-through' : 'initial'}}
+        style={{textDecoration: this.props.isComplete ?
+          'line-through' : 'initial'}}
         onClick={() => this.handleToggleIsComplete(
           this.props.listNum, this.props.taskNum)}>
         {this.props.task}
@@ -25,7 +26,20 @@ class List extends React.Component {
   }
 
   render() {
-    const taskList = this.props.taskList.map((todo, index) =>
+    let view = this.props.view;
+    var updatedTaskList = this.props.taskList.slice();
+
+    if (view !== 0) {
+      for (var i = 0; i < updatedTaskList.length; i++) {
+        if (view === 1 && updatedTaskList[i].isComplete) {
+          updatedTaskList.splice(i, 1);
+        } else if (view === 2 && !updatedTaskList[i].isComplete) {
+          updatedTaskList.splice(i, 1);
+        }
+      }
+    }
+
+    const taskList = updatedTaskList.map((todo, index) =>
       <ListItem
         task={todo.task}
         key={index}
@@ -98,6 +112,7 @@ class ListContainer extends React.Component {
           listNum={this.props.listNum}
           handleAddTask={this.handleAddTask} />
         <List
+          view={this.props.view}
           taskList={this.props.taskList}
           toggleIsComplete={this.handleToggleIsComplete} />
       </div>
@@ -106,12 +121,19 @@ class ListContainer extends React.Component {
 }
 
 class FilterButtons extends React.Component {
+  handleChangeView = (view) => {
+    this.props.changeState(view);
+  }
+
   render() {
     return (
       <div className="FilterButtons">
-        <button> All </button>
-        <button> In-Progress Tasks </button>
-        <button> Completed </button>
+        <button
+          onClick={() => this.handleChangeView(0)}> All </button>
+        <button
+          onClick={() => this.handleChangeView(1)}> In-Progress Tasks </button>
+        <button
+          onClick={() => this.handleChangeView(2)}> Completed </button>
       </div>
     );
   }
@@ -162,13 +184,20 @@ class App extends React.Component {
       taskList: updatedTaskList});
   }
 
+  changeState = (view) => {
+    this.setState({
+      view: view
+    })
+  }
+
   render() {
-    console.log(this.state.taskList);
+    // console.log("state: ", this.state);
 
     const lists = this.state.taskList.map((list, index) =>
       <ListContainer
         key={index}
         taskList={list}
+        view={this.state.view}
         listNum={index}
         addTask={this.addTask}
         toggleIsComplete={this.toggleIsComplete} />
@@ -176,7 +205,8 @@ class App extends React.Component {
 
     return (
       <div className="App">
-        <FilterButtons view={this.state.view} />
+        <FilterButtons
+          changeState={this.changeState} />
         <NewList addNewList={this.addNewList} />
         <br /> {/* why doesn't this work?? */}
         {lists}
