@@ -2,91 +2,90 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-const ListItem = (props) => (
-  <li
-    onClick={props.onClick}
-    style={{textDecoration: props.isComplete ? "line-through" : "initial"}}
-  > {props.task} </li>
-)
-
-class App extends React.Component {
-  state = {
-    taskList: [[]],
-    inputValue: "",
-    view: 0,
-    listNum: 0
-  }
-
-  addTodo = () => {
-    if (this.state.inputValue.trim()) {
-      let updatedTaskList = this.state.taskList.slice();
-      updatedTaskList[this.state.listNum].push({
-        task: this.state.inputValue,
-        isComplete: false,
-        itemListNum: this.state.listNum
-      });
-      this.setState({taskList: updatedTaskList, inputValue: ""});
-    }
-  }
-
-  checked = (itemListNum, index) => {
-    let updatedTaskList = this.state.taskList.slice();
-    updatedTaskList[itemListNum][index].isComplete = !updatedTaskList[itemListNum][index].isComplete;
-    this.setState({taskList: updatedTaskList});
-  }
-
-  updateView = (viewNum) => { this.setState({view: viewNum}); }
-
-  newList = () => {
-    let updatedTaskList = this.state.taskList.slice();
-    updatedTaskList.push([]);
-
-    let newListNum = this.state.listNum+1;
-    this.setState({listNum: newListNum, taskList: updatedTaskList});
-  }
-
+class ListItem extends React.Component {
   render() {
-    console.log(this.state);
+    return (
+      <li>
+        {this.props.task}
+      </li>
+    );
+  }
+}
+
+class List extends React.Component {
+  render() {
+    const taskList = this.props.taskList.map(todo =>
+      <ListItem task={todo} />
+    );
 
     return (
-      <div className="todoApp">
-        <button onClick={() => this.updateView(0)}>All Tasks</button>
-        <button onClick={() => this.updateView(1)}>In-Progress Tasks</button>
-        <button onClick={() => this.updateView(2)}>Completed Tasks</button>
-
-        <br></br><br></br>
-
-        <input
-          value={this.state.inputValue}
-          onChange={change => {
-            this.setState({inputValue: change.target.value})
-          }}
-        />
-        <button onClick={this.addTodo}>Add Task</button>
-        <button onClick={this.newList}>New List</button>
-
+      <div className="List">
         <ul>
-            { // BUG: CANNOT DISPLAY ENTIRE TASKLIST
-              //this.state.taskList.map((list, index1) => {
-              this.state.taskList[0].map((todo, index) => {
-                console.log(this.state);
-                var returnValue = <ListItem
-                                    key={todo.task.concat(index)}
-                                    task={todo.task}
-                                    isComplete={todo.isComplete}
-                                    onClick={() => {this.checked(todo.itemListNum, index)}}
-                                  />
-                if(this.state.view === 0) {
-                  return returnValue
-                } else if (this.state.view === 1 && !todo.isComplete) {
-                  return returnValue
-                } else if (this.state.view === 2 && todo.isComplete) {
-                  return returnValue
-                }
-              })
-             //})
-            }
+          {taskList}
         </ul>
+      </div>
+    );
+  }
+}
+
+class AddTask extends React.Component {
+  render() {
+    return (
+      <div className="AddTask">
+        <input placeholder="Add task here..." />
+        <button> Add Task </button>
+      </div>
+    );
+  }
+}
+
+class ListContainer extends React.Component {
+  render() {
+    return (
+      <div className="ListContainer">
+        <AddTask />
+        <List taskList={this.props.taskList}/>
+      </div>
+    );
+  }
+}
+
+class FilterButtons extends React.Component {
+  render() {
+    return (
+      <div className="FilterButtons">
+        <button> All </button>
+        <button> In-Progress Tasks </button>
+        <button> Completed </button>
+      </div>
+    );
+  }
+}
+
+class NewList extends React.Component {
+  render() {
+    return (
+      <button> New List </button>
+    );
+  }
+}
+
+class App extends React.Component {
+  render() {
+    const taskList=[
+      ["sleep", "homework", "todo list"],
+      ["wake up", "work", "nothing"]
+    ];
+    const lists = taskList.map(list =>
+      <ListContainer taskList={list} />
+    );
+
+    return (
+      <div className="App">
+        <FilterButtons />
+        <NewList />
+        <br /> {/* why doesn't this work?? */}
+        {lists}
       </div>
     );
   }
