@@ -10,7 +10,7 @@ class ListItem extends React.Component {
   render() {
     return (
       <li
-        style={{textDecoration: this.props.isComplete ? 'strike-through' : 'initial'}}
+        style={{textDecoration: this.props.isComplete ? 'line-through' : 'initial'}}
         onClick={() => this.handleToggleIsComplete(
           this.props.listNum, this.props.taskNum)}>
         {this.props.task}
@@ -157,7 +157,7 @@ class App extends React.Component {
   toggleIsComplete = (listNum, taskNum) => {
     let updatedTaskList = this.state.taskList.slice();
     let updatedTask = updatedTaskList[listNum][taskNum];
-    updatedTask.isCompleted = !updatedTask.isCompleted;
+    updatedTask.isComplete = !updatedTask.isComplete;
     this.setState({
       taskList: updatedTaskList});
   }
