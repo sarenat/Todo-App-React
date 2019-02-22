@@ -14,8 +14,10 @@ class ListItem extends React.Component {
 
 class List extends React.Component {
   render() {
-    const taskList = this.props.taskList.map(todo =>
-      <ListItem task={todo} />
+    const taskList = this.props.taskList.map((todo, index) =>
+      <ListItem
+        task={todo}
+        key={index} />
     );
 
     return (
@@ -29,22 +31,53 @@ class List extends React.Component {
 }
 
 class AddTask extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputValue: ""
+    }
+  }
+
+  addTask = (listNum, input) => {
+    console.log("im in addTask!");
+    var task = {
+      task: input,
+      listNum: listNum,
+      isComplete: false
+    }
+    this.props.handleAddTask(task);
+  }
+
   render() {
     return (
       <div className="AddTask">
-        <input placeholder="Add task here..." />
-        <button> Add Task </button>
+        <input
+          placeholder="Add task here..."
+          value={this.state.inputValue}
+          onChange={e => {
+            this.setState({inputValue: e.target.value})
+          }}/>
+        <button onClick={() => {
+          this.addTask(this.props.listNum,
+            this.state.inputValue)}}> Add Task </button>
       </div>
     );
   }
 }
 
 class ListContainer extends React.Component {
+  handleAddTask = (task) => {
+    console.log("listContainer: task: ", task);
+    this.props.addTask(task);
+  }
+
   render() {
     return (
       <div className="ListContainer">
-        <AddTask />
-        <List taskList={this.props.taskList}/>
+        <AddTask
+          listNum={this.props.listNum}
+          handleAddTask={() => this.handleAddTask} />
+        <List taskList={this.props.taskList} />
       </div>
     );
   }
@@ -63,27 +96,58 @@ class FilterButtons extends React.Component {
 }
 
 class NewList extends React.Component {
+  handleNewList = () => {
+    this.props.addNewList();
+  }
+
   render() {
     return (
-      <button> New List </button>
+      <button onClick={this.handleNewList}> New List </button>
     );
   }
 }
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      taskList: [],
+      view: 0
+    };
+  }
+
+  addTask = (task) => {
+    console.log("task: ", task);
+    let updatedTaskList = this.state.taskList.splice();
+    updatedTaskList[task.listNum].push(task);
+    this.setState({
+      taskList: updatedTaskList
+    });
+  }
+
+  addNewList = () => {
+    let updatedTaskList = this.state.taskList.splice();
+    updatedTaskList.push([]);
+    this.setState({
+      taskList: updatedTaskList
+    })
+  }
+
   render() {
-    const taskList=[
-      ["sleep", "homework", "todo list"],
-      ["wake up", "work", "nothing"]
-    ];
-    const lists = taskList.map(list =>
-      <ListContainer taskList={list} />
+    console.log(this.state.taskList);
+
+    const lists = this.state.taskList.map((list, index) =>
+      <ListContainer
+        key={index}
+        taskList={list}
+        listNum={index}
+        addTask={() => {this.addTask()}} />
     );
 
     return (
       <div className="App">
-        <FilterButtons />
-        <NewList />
+        <FilterButtons view={this.state.view} />
+        <NewList addNewList={this.addNewList} />
         <br /> {/* why doesn't this work?? */}
         {lists}
       </div>
