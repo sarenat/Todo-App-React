@@ -61,6 +61,9 @@ class AddTask extends React.Component {
       isComplete: false
     };
     this.props.handleAddTask(task);
+    this.setState({
+      inputValue: ""
+    })
   }
 
   render() {
@@ -139,7 +142,7 @@ class App extends React.Component {
     let updatedTaskList = this.state.taskList.slice();
     updatedTaskList[task.listNum].push(task);
     this.setState({
-      taskList: updatedTaskList
+      taskList: updatedTaskList,
     });
   }
 
