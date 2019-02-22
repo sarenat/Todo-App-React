@@ -39,12 +39,12 @@ class AddTask extends React.Component {
   }
 
   addTask = (listNum, input) => {
-    console.log("im in addTask!");
     var task = {
       task: input,
       listNum: listNum,
       isComplete: false
     }
+    console.log("im in AddTask! task: ", task);
     this.props.handleAddTask(task);
   }
 
@@ -66,8 +66,8 @@ class AddTask extends React.Component {
 }
 
 class ListContainer extends React.Component {
-  handleAddTask = (task) => {
-    console.log("listContainer: task: ", task);
+  handleAddTask = task => {
+    console.log("im in ListContainer's handleAddTask: ", task);
     this.props.addTask(task);
   }
 
@@ -76,7 +76,7 @@ class ListContainer extends React.Component {
       <div className="ListContainer">
         <AddTask
           listNum={this.props.listNum}
-          handleAddTask={() => this.handleAddTask} />
+          handleAddTask={this.handleAddTask} />
         <List taskList={this.props.taskList} />
       </div>
     );
@@ -97,12 +97,13 @@ class FilterButtons extends React.Component {
 
 class NewList extends React.Component {
   handleNewList = () => {
+    console.log("im in NewList's handleNewList!");
     this.props.addNewList();
   }
 
   render() {
     return (
-      <button onClick={this.handleNewList}> New List </button>
+      <button onClick={() => this.handleNewList()}> New List </button>
     );
   }
 }
@@ -117,16 +118,18 @@ class App extends React.Component {
   }
 
   addTask = (task) => {
-    console.log("task: ", task);
+    console.log("im in addTask! task: ", task, "taskListNum: ", task.listNum);
     let updatedTaskList = this.state.taskList.splice();
-    updatedTaskList[task.listNum].push(task);
+    console.log("this is updatedTaskList: ", updatedTaskList);
+    let listAt = updatedTaskList[task.listNum];
+    listAt.push(["test"]);
     this.setState({
       taskList: updatedTaskList
     });
   }
 
   addNewList = () => {
-    let updatedTaskList = this.state.taskList.splice();
+    let updatedTaskList = this.state.taskList.slice();
     updatedTaskList.push([]);
     this.setState({
       taskList: updatedTaskList
@@ -141,13 +144,13 @@ class App extends React.Component {
         key={index}
         taskList={list}
         listNum={index}
-        addTask={() => {this.addTask()}} />
+        addTask={this.addTask} />
     );
 
     return (
       <div className="App">
         <FilterButtons view={this.state.view} />
-        <NewList addNewList={this.addNewList} />
+        <NewList addNewList={() => this.addNewList()} />
         <br /> {/* why doesn't this work?? */}
         {lists}
       </div>
