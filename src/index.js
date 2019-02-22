@@ -16,8 +16,10 @@ class List extends React.Component {
   render() {
     const taskList = this.props.taskList.map((todo, index) =>
       <ListItem
-        task={todo}
-        key={index} />
+        task={todo.task}
+        key={index}
+        listNum={todo.listNum}
+        isComplete={todo.isComplete} />
     );
 
     return (
@@ -119,10 +121,8 @@ class App extends React.Component {
 
   addTask = (task) => {
     console.log("im in addTask! task: ", task, "taskListNum: ", task.listNum);
-    let updatedTaskList = this.state.taskList.splice();
-    console.log("this is updatedTaskList: ", updatedTaskList);
-    let listAt = updatedTaskList[task.listNum];
-    listAt.push(["test"]);
+    let updatedTaskList = this.state.taskList.slice();
+    updatedTaskList[task.listNum].push(task);
     this.setState({
       taskList: updatedTaskList
     });
