@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 class ListItem extends React.Component {
-  handleToggleIsComplete = (listNum, taskNum) => {
-    this.props.toggleIsComplete(listNum, taskNum);
+  handleToggleItem = (listNum, taskNum) => {
+    this.props.toggleItem(listNum, taskNum);
   }
 
   render() {
@@ -12,8 +12,8 @@ class ListItem extends React.Component {
       <li
         style={{textDecoration: this.props.isComplete ?
           'line-through' : 'initial'}}
-        onClick={() => this.handleToggleIsComplete(
-          this.props.listNum, this.props.taskNum)}>
+        onClick={() => this.handleToggleItem(
+          this.props.listNum, this.props.taskNum)} >
         {this.props.task}
       </li>
     );
@@ -21,23 +21,25 @@ class ListItem extends React.Component {
 }
 
 class List extends React.Component {
-  handleToggleIsComplete = (listNum, taskNum) => {
-    this.props.toggleIsComplete(listNum, taskNum);
+  handleToggleItem = (listNum, taskNum) => {
+    this.props.toggleItem(listNum, taskNum);
   }
 
   render() {
     let view = this.props.view;
-    var updatedTaskList = this.props.taskList.slice();
+    let todoList = this.props.taskList.slice();
+    let updatedTaskList = [];
 
-    if (view !== 0) {
-      for (var i = 0; i < updatedTaskList.length; i++) {
-        if (view === 1 && updatedTaskList[i].isComplete) {
-          updatedTaskList.splice(i, 1);
-        } else if (view === 2 && !updatedTaskList[i].isComplete) {
-          updatedTaskList.splice(i, 1);
-        }
+    /* Filter through todoList with respect to view */
+    todoList.forEach((task) => {
+      if (view === 1 && !task.isComplete) {
+        updatedTaskList.push(task);
+      } else if (view === 2 && task.isComplete) {
+        updatedTaskList.push(task);
+      } else if (view === 0) {
+        updatedTaskList.push(task);
       }
-    }
+    });
 
     const taskList = updatedTaskList.map((todo, index) =>
       <ListItem
@@ -46,7 +48,7 @@ class List extends React.Component {
         taskNum={index}
         listNum={todo.listNum}
         isComplete={todo.isComplete}
-        toggleIsComplete={this.handleToggleIsComplete}
+        toggleItem={this.handleToggleItem}
       />
     );
 
@@ -69,12 +71,14 @@ class AddTask extends React.Component {
   }
 
   addTask = (listNum, input) => {
-    var task = {
-      task: input,
-      listNum: listNum,
-      isComplete: false
-    };
-    this.props.handleAddTask(task);
+    if (this.state.inputValue.trim().length) {
+      var task = {
+        task: input,
+        listNum: listNum,
+        isComplete: false
+      };
+      this.props.handleAddTask(task);
+    }
     this.setState({
       inputValue: ""
     })
@@ -88,10 +92,10 @@ class AddTask extends React.Component {
           value={this.state.inputValue}
           onChange={e => {
             this.setState({inputValue: e.target.value})
-          }}/>
+          }} />
         <button onClick={() => {
           this.addTask(this.props.listNum,
-            this.state.inputValue)}}> Add Task </button>
+            this.state.inputValue)}} > Add Task </button>
       </div>
     );
   }
@@ -101,8 +105,8 @@ class ListContainer extends React.Component {
   handleAddTask = task => {
     this.props.addTask(task);
   }
-  handleToggleIsComplete = (listNum, taskNum) => {
-    this.props.toggleIsComplete(listNum, taskNum);
+  handleToggleItem = (listNum, taskNum) => {
+    this.props.toggleItem(listNum, taskNum);
   }
 
   render() {
@@ -114,7 +118,7 @@ class ListContainer extends React.Component {
         <List
           view={this.props.view}
           taskList={this.props.taskList}
-          toggleIsComplete={this.handleToggleIsComplete} />
+          toggleItem={this.handleToggleItem} />
       </div>
     );
   }
@@ -176,7 +180,7 @@ class App extends React.Component {
     });
   }
 
-  toggleIsComplete = (listNum, taskNum) => {
+  toggleItem = (listNum, taskNum) => {
     let updatedTaskList = this.state.taskList.slice();
     let updatedTask = updatedTaskList[listNum][taskNum];
     updatedTask.isComplete = !updatedTask.isComplete;
@@ -191,7 +195,7 @@ class App extends React.Component {
   }
 
   render() {
-    // console.log("state: ", this.state);
+     console.log("state: ", this.state);
 
     const lists = this.state.taskList.map((list, index) =>
       <ListContainer
@@ -200,7 +204,7 @@ class App extends React.Component {
         view={this.state.view}
         listNum={index}
         addTask={this.addTask}
-        toggleIsComplete={this.toggleIsComplete} />
+        toggleItem={this.toggleItem} />
     );
 
     return (
