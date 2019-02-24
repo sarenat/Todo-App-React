@@ -25,18 +25,6 @@ class BoardSelect extends React.Component {
   }
 }
 
-class FilterButtons extends React.Component {
-  render() {
-    return (
-      <div className="filterButtons">
-        <button> All </button>
-        <button> In-Progress Tasks </button>
-        <button> Completed </button>
-      </div>
-    );
-  }
-}
-
 class AddTask extends React.Component {
   render() {
     return (
@@ -84,16 +72,24 @@ class List extends React.Component {
     let propsTaskList = this.props.taskList;
     const keys = Object.keys(propsTaskList);
     /* Iterate through this.props.taskList */
-    keys.map(key => tasks.push(
-      <ListItem
-        key={key}
-        taskNum={key}
-        listNum={this.props.listNum}
-        boardNum={this.props.boardNum}
-        task={propsTaskList[key].task}
-        isComplete={propsTaskList[key].isComplete}
-        handleToggleItem={this.handleToggleItem} />
-    ));
+    keys.map(key => {
+      let view = this.props.view;
+      let listItem = <ListItem
+                        key={key}
+                        taskNum={key}
+                        listNum={this.props.listNum}
+                        boardNum={this.props.boardNum}
+                        task={propsTaskList[key].task}
+                        isComplete={propsTaskList[key].isComplete}
+                        handleToggleItem={this.handleToggleItem} />
+      if (view === 0) {
+        tasks.push(listItem);
+      } else if (view === 1 && !propsTaskList[key].isComplete) {
+        tasks.push(listItem);
+      } else if (view === 2 && propsTaskList[key].isComplete) {
+        tasks.push(listItem);
+      }
+    });
 
     return (
       <div className="list">
@@ -120,15 +116,35 @@ class ListContainer extends React.Component {
           listNum={this.props.listNum}
           boardNum={this.props.boardNum}
           taskList={this.props.taskList}
-          handleToggleItem={this.handleToggleItem} />
+          handleToggleItem={this.handleToggleItem}
+          view={this.props.view} />
       </div>
     );
   };
 }
 
+class FilterButtons extends React.Component {
+  handleViewChange = (view) => {
+    this.props.handleViewChange(view);
+  }
+
+  render() {
+    return (
+      <div className="filterButtons">
+        <button onClick={() => this.handleViewChange(0)}> All </button>
+        <button onClick={() => this.handleViewChange(1)}> In-Progress Tasks </button>
+        <button onClick={() => this.handleViewChange(2)}> Completed </button>
+      </div>
+    );
+  }
+}
+
 class Board extends React.Component {
   handleToggleItem = (taskNum, listNum, boardNum) => {
     this.props.handleToggleItem(taskNum, listNum, boardNum);
+  }
+  handleViewChange = (view) => {
+    this.props.handleViewChange(view);
   }
 
   render() {
@@ -142,12 +158,14 @@ class Board extends React.Component {
         listNum={key}
         boardNum={this.props.boardNum}
         taskList={propsLists[key]}
-        handleToggleItem={this.handleToggleItem} />
+        handleToggleItem={this.handleToggleItem}
+        view={this.props.view} />
     ));
 
     return (
       <div className="board">
-        <FilterButtons />
+        <FilterButtons
+          handleViewChange={this.handleViewChange}/>
         <NewList />
         {listContainers}
       </div>
@@ -193,7 +211,7 @@ class App extends React.Component {
     };
   }
 
-  handleToggleItem = (taskNum, listNum, boardNum) => {
+  toggleItem = (taskNum, listNum, boardNum) => {
     let updatedBoard = this.state.currentBoard.slice();
     console.log(updatedBoard[listNum][taskNum]);
     updatedBoard[listNum][taskNum].isComplete =
@@ -205,15 +223,23 @@ class App extends React.Component {
     });
   }
 
+  viewChange = (view) => {
+    this.setState({
+      view: view
+    });
+  }
+
   render() {
     return (
       <div className="app">
         <NewBoard />
         <BoardSelect /> <br />
+        {/* pass boardNum={} into <Board /> */}
         <Board
-          boardNum={this.state.view}
           lists={this.state.currentBoard}
-          handleToggleItem={this.handleToggleItem} />
+          handleToggleItem={this.toggleItem}
+          view={this.state.view}
+          handleViewChange={this.viewChange} />
       </div>
     );
   }
