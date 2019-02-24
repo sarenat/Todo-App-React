@@ -155,7 +155,7 @@ class NewList extends React.Component {
   }
 }
 
-class App extends React.Component {
+class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -195,7 +195,7 @@ class App extends React.Component {
   }
 
   render() {
-     console.log("state: ", this.state);
+    // console.log("state: ", this.state);
 
     const lists = this.state.taskList.map((list, index) =>
       <ListContainer
@@ -212,8 +212,126 @@ class App extends React.Component {
         <FilterButtons
           changeState={this.changeState} />
         <NewList addNewList={this.addNewList} />
-        <br /> {/* why doesn't this work?? */}
         {lists}
+      </div>
+    );
+  }
+}
+
+class NewBoard extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputValue: ""
+    }
+  }
+
+  handleCreateBoard = () => {
+    var newBoard = {
+      boardName: this.state.inputValue,
+      board: <Board />
+    };
+    this.props.handleCreateBoard(newBoard);
+    this.setState({
+      inputValue: ""
+    });
+  }
+
+  render () {
+    return (
+      <div className="newBoard">
+        <input
+          placeholder="Name board here..."
+          value={this.state.inputValue}
+          onChange={e => {
+            this.setState({inputValue: e.target.value})}}
+        />
+        <button
+          onClick={this.handleCreateBoard}>Create Board</button>
+      </div>
+    );
+  }
+}
+
+class BoardSelect extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selected: ""
+    }
+  }
+
+  handleBoardSelect = (e) => {
+    this.setState({
+      selected: e.target.value
+    });
+  }
+
+  render() {
+    let boardNames = [];
+    this.props.boards.forEach((board, index) => {
+      let boardName = board.boardName;
+      boardNames.push(
+        <option key={boardName+index}>{boardName}</option>);
+    });
+
+    return (
+      <div className="selectBoards">
+        <select
+          className="boards"
+          value={this.state.selected}
+          onChange={() =>
+            this.handleBoardSelect
+
+          }>
+          <option default>Select a Board</option>
+          {boardNames}
+        </select>
+      </div>
+    );
+  }
+}
+
+var boards = [];
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      boardSelect: ""
+    };
+  }
+
+  createBoard = (newBoard) => {
+    boards.push(newBoard);
+  }
+
+  boardSelect = (boardName) => {
+    this.setState({
+      boardSelect: boardName
+    });
+  }
+
+  render() {
+    console.log(this.state);
+
+    var selectedBoard;
+    if (boards.length) {
+      boards.forEach((board) =>{
+        if (board.boardName === this.state.boardSelect) {
+          selectedBoard = board.board;
+        }
+      });
+    }
+    
+    return (
+      <div className="app">
+        <NewBoard
+          handleCreateBoard={this.createBoard}/>
+        <BoardSelect
+          handleBoardSelect={this.boardSelect}
+          boards={this.state.boards}/> <br/>
+          {selectedBoard}
       </div>
     );
   }
