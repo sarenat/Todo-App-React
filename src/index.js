@@ -13,18 +13,6 @@ class NewBoard extends React.Component {
   }
 }
 
-class BoardSelect extends React.Component {
-  render() {
-    return (
-      <div className="boardSelect">
-        <select className="boardNames">
-          <option default>Select a Board</option>
-        </select>
-      </div>
-    );
-  }
-}
-
 class AddTask extends React.Component {
   render() {
     return (
@@ -173,53 +161,147 @@ class Board extends React.Component {
   }
 }
 
+class BoardSelect extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputValue: "",
+      boards: ["First Board", "Second Board", "Third Board"]
+    };
+  }
+
+  handleChange = e => {
+    this.setState({
+      inputValue: e.target.value
+    });
+  }
+  handleSelectBoard = () => {
+    this.props.handleSelectBoard(
+      this.state.boards.indexOf(this.state.inputValue)
+    );
+  }
+
+  render() {
+    return (
+      <div className="boardSelect">
+        <select
+          className="boardNames"
+          value={this.state.inputValue}
+          onChange={this.handleChange} >
+          <option default>Select a Board</option>
+          <option>First Board</option>
+          <option>Second Board</option>
+          <option>Third Board</option>
+        </select>
+        <button
+          onClick={this.handleSelectBoard}> Select </button>
+      </div>
+    );
+  }
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      boards: [],
+      currentBoard: [],
+      currentBoardNum: null,
+      boards: [[[
+      {
+       task: "firstBoard firstList: test",
+       boardNum: 0,
+       listNum: 0,
+       taskNum: 0,
+       isComplete: false
+      },
+      {
+        task: "test1",
+        boardNum: 0,
+        listNum: 0,
+        taskNum: 1,
+        isComplete: false
+      }],
+      [{
+       task: "firstBoard secondList: test2",
+       boardNum: 0,
+       listNum: 1,
+       taskNum: 0,
+       isComplete: false
+      },
+      {
+        task: "test3",
+        boardNum: 0,
+        listNum: 1,
+        taskNum: 1,
+        isComplete: false
+      }]],
+      [[{
+       task: "secondBoard firstList: test4",
+       boardNum: 0,
+       listNum: 1,
+       taskNum: 0,
+       isComplete: false
+      },
+      {
+        task: "test5",
+        boardNum: 0,
+        listNum: 1,
+        taskNum: 1,
+        isComplete: false
+      }],
+      [{
+       task: "secondBoard secondList: test5",
+       boardNum: 0,
+       listNum: 1,
+       taskNum: 0,
+       isComplete: false
+      },
+      {
+        task: "test6",
+        boardNum: 0,
+        listNum: 1,
+        taskNum: 1,
+        isComplete: false
+      }]],
+      [[{
+       task: "thirdBoard firstList: test4",
+       boardNum: 0,
+       listNum: 1,
+       taskNum: 0,
+       isComplete: false
+      },
+      {
+        task: "test5",
+        boardNum: 0,
+        listNum: 1,
+        taskNum: 1,
+        isComplete: false
+      }],
+      [{
+       task: "thirdBoard secondList: test5",
+       boardNum: 0,
+       listNum: 1,
+       taskNum: 0,
+       isComplete: false
+      },
+      {
+        task: "test6",
+        boardNum: 0,
+        listNum: 1,
+        taskNum: 1,
+        isComplete: false
+      }]]],
       view: 0,
-      currentBoard: [[
-        {
-         task: "test",
-         boardNum: 0,
-         listNum: 0,
-         taskNum: 0,
-         isComplete: false
-        },
-        {
-          task: "test1",
-          boardNum: 0,
-          listNum: 0,
-          taskNum: 1,
-          isComplete: false
-        }], [
-         {
-          task: "test2",
-          boardNum: 0,
-          listNum: 1,
-          taskNum: 0,
-          isComplete: false
-        },
-        {
-          task: "test3",
-          boardNum: 0,
-          listNum: 1,
-          taskNum: 1,
-          isComplete: false
-        }]]
     };
   }
 
   toggleItem = (taskNum, listNum, boardNum) => {
-    let updatedBoard = this.state.currentBoard.slice();
-    console.log(updatedBoard[listNum][taskNum]);
-    updatedBoard[listNum][taskNum].isComplete =
-      !updatedBoard[listNum][taskNum].isComplete;
-    // updatedBoard[boardNum][listNum][taskNum].isComplete =
-    //   !updatedBoard[boardNum][listNum][taskNum].isComplete;
+    let updatedBoard = this.state.boards.slice();
+    console.log(updatedBoard[listNum][taskNum], updatedBoard[listNum][taskNum].isComplete);
+    updatedBoard[boardNum][listNum][taskNum].isComplete =
+      !updatedBoard[boardNum][listNum][taskNum].isComplete;
     this.setState({
-      currentBoard: updatedBoard
+      boards: updatedBoard
     });
   }
 
@@ -229,13 +311,29 @@ class App extends React.Component {
     });
   }
 
+  selectBoard = (index) => {
+    if (index === -1) {
+      return null;
+    } else {
+        let boards = this.state.boards.slice();
+        let updatedCurrentBoard = boards[index];
+        this.setState({
+          currentBoardNum: index,
+          currentBoard: updatedCurrentBoard
+        });
+      }
+  }
+
   render() {
+    console.log(this.state);
+
     return (
       <div className="app">
         <NewBoard />
-        <BoardSelect /> <br />
-        {/* pass boardNum={} into <Board /> */}
+        <BoardSelect
+          handleSelectBoard={this.selectBoard} /> <br />
         <Board
+          boardNum={this.state.currentBoardNum}
           lists={this.state.currentBoard}
           handleToggleItem={this.toggleItem}
           view={this.state.view}
