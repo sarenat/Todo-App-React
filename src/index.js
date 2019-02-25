@@ -14,11 +14,41 @@ class NewBoard extends React.Component {
 }
 
 class AddTask extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputValue: ""
+    };
+  }
+
+  handleAddTask = () => {
+    if (this.state.inputValue.trim().length) {
+      let listNum = this.props.listNum;
+      let boardNum = this.props.boardNum;
+      let inputValue = this.state.inputValue;
+      var task = {
+        task: inputValue,
+        listNum: listNum,
+        boardNum: boardNum,
+        isComplete: false
+      };
+      this.props.handleAddTask(task);
+      this.setState({
+        inputValue: ""
+      });
+    }
+  }
+
   render() {
     return (
       <div className="AddTask">
-        <input placeholder="Add Task Here..." />
-        <button> Add Task </button>
+        <input
+          placeholder="Add Task Here..."
+          value={this.state.inputValue}
+          onChange={e => this.setState({
+            inputValue: e.target.value})} />
+        <button
+          onClick={this.handleAddTask}> Add Task </button>
       </div>
     );
   }
@@ -82,6 +112,7 @@ class List extends React.Component {
       } else if (view === 2 && propsTaskList[key].isComplete) {
         tasks.push(listItem);
       }
+      return 0;
     });
 
     return (
@@ -98,13 +129,17 @@ class ListContainer extends React.Component {
   handleToggleItem = (taskNum, listNum, boardNum) => {
     this.props.handleToggleItem(taskNum, listNum, boardNum);
   }
+  handleAddTask = (task) => {
+    this.props.handleAddTask(task);
+  }
 
   render() {
     return (
       <div className="listContainer">
         <AddTask
           listNum={this.props.listNum}
-          boardNum={this.props.boardNum}/>
+          boardNum={this.props.boardNum}
+          handleAddTask={this.handleAddTask} />
         <List
           listNum={this.props.listNum}
           boardNum={this.props.boardNum}
@@ -142,6 +177,9 @@ class Board extends React.Component {
   handleNewList = (boardNum) => {
     this.props.handleNewList(boardNum);
   }
+  handleAddTask = (task) => {
+    this.props.handleAddTask(task);
+  }
 
   render() {
     let listContainers = [];
@@ -155,7 +193,8 @@ class Board extends React.Component {
         boardNum={this.props.boardNum}
         taskList={propsLists[key]}
         handleToggleItem={this.handleToggleItem}
-        view={this.props.view} />
+        view={this.props.view}
+        handleAddTask={this.handleAddTask} />
     ));
 
     return (
@@ -341,6 +380,14 @@ class App extends React.Component {
     });
   }
 
+  addTask = (task) => {
+    let updatedBoards = this.state.boards.slice();
+    updatedBoards[task.boardNum][task.listNum].push(task);
+    this.setState({
+      boards: updatedBoards
+    });
+  }
+
   render() {
     console.log(this.state);
     let currentBoard = [];
@@ -350,7 +397,8 @@ class App extends React.Component {
                     handleToggleItem={this.toggleItem}
                     view={this.state.view}
                     handleViewChange={this.viewChange}
-                    handleNewList={this.newList} />;
+                    handleNewList={this.newList}
+                    handleAddTask={this.addTask} />;
     if (this.state.currentBoard === null) {
       currentBoard = null;
     } else { currentBoard = board; }
