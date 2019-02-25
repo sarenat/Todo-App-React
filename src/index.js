@@ -25,9 +25,14 @@ class AddTask extends React.Component {
 }
 
 class NewList extends React.Component {
+  handleNewList = () => {
+    let boardNum = this.props.boardNum;
+    this.props.handleNewList(boardNum);
+  }
+
   render() {
     return (
-      <button> New List </button>
+      <button onClick={this.handleNewList}> New List </button>
     );
   }
 }
@@ -134,6 +139,9 @@ class Board extends React.Component {
   handleViewChange = (view) => {
     this.props.handleViewChange(view);
   }
+  handleNewList = (boardNum) => {
+    this.props.handleNewList(boardNum);
+  }
 
   render() {
     let listContainers = [];
@@ -154,7 +162,9 @@ class Board extends React.Component {
       <div className="board">
         <FilterButtons
           handleViewChange={this.handleViewChange}/>
-        <NewList />
+        <NewList
+          handleNewList={this.handleNewList}
+          boardNum={this.props.boardNum}/>
         {listContainers}
       </div>
     );
@@ -204,7 +214,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentBoard: [],
+      currentBoard: null,
       currentBoardNum: null,
       boards: [[[
       {
@@ -296,12 +306,11 @@ class App extends React.Component {
   }
 
   toggleItem = (taskNum, listNum, boardNum) => {
-    let updatedBoard = this.state.boards.slice();
-    console.log(updatedBoard[listNum][taskNum], updatedBoard[listNum][taskNum].isComplete);
-    updatedBoard[boardNum][listNum][taskNum].isComplete =
-      !updatedBoard[boardNum][listNum][taskNum].isComplete;
+    let updatedBoards = this.state.boards.slice();
+    updatedBoards[boardNum][listNum][taskNum].isComplete =
+      !updatedBoards[boardNum][listNum][taskNum].isComplete;
     this.setState({
-      boards: updatedBoard
+      boards: updatedBoards
     });
   }
 
@@ -324,20 +333,33 @@ class App extends React.Component {
       }
   }
 
+  newList = (boardNum) => {
+    let updatedBoards = this.state.boards.slice();
+    updatedBoards[boardNum].push([]);
+    this.setState({
+      boards: updatedBoards
+    });
+  }
+
   render() {
     console.log(this.state);
-
+    let currentBoard = [];
+    const board = <Board
+                    boardNum={this.state.currentBoardNum}
+                    lists={this.state.currentBoard}
+                    handleToggleItem={this.toggleItem}
+                    view={this.state.view}
+                    handleViewChange={this.viewChange}
+                    handleNewList={this.newList} />;
+    if (this.state.currentBoard === null) {
+      currentBoard = null;
+    } else { currentBoard = board; }
     return (
       <div className="app">
         <NewBoard />
         <BoardSelect
           handleSelectBoard={this.selectBoard} /> <br />
-        <Board
-          boardNum={this.state.currentBoardNum}
-          lists={this.state.currentBoard}
-          handleToggleItem={this.toggleItem}
-          view={this.state.view}
-          handleViewChange={this.viewChange} />
+          {currentBoard}
       </div>
     );
   }
