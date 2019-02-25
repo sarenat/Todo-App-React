@@ -2,17 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class NewBoard extends React.Component {
-  render() {
-    return (
-      <div className="newBoard">
-        <input placeholder="Name board here..." />
-        <button> Create Board </button>
-      </div>
-    );
-  }
-}
-
 class AddTask extends React.Component {
   constructor(props) {
     super(props);
@@ -215,7 +204,6 @@ class BoardSelect extends React.Component {
     super(props);
     this.state = {
       inputValue: "",
-      boards: ["First Board", "Second Board", "Third Board"]
     };
   }
 
@@ -225,12 +213,13 @@ class BoardSelect extends React.Component {
     });
   }
   handleSelectBoard = () => {
-    this.props.handleSelectBoard(
-      this.state.boards.indexOf(this.state.inputValue)
-    );
+    this.props.handleSelectBoard(this.state.inputValue);
   }
 
   render() {
+    let boardNames = this.props.boardNames.map((name, index) =>
+      <option key={index}>{name}</option>);
+
     return (
       <div className="boardSelect">
         <select
@@ -238,12 +227,42 @@ class BoardSelect extends React.Component {
           value={this.state.inputValue}
           onChange={this.handleChange} >
           <option default>Select a Board</option>
-          <option>First Board</option>
-          <option>Second Board</option>
-          <option>Third Board</option>
+          {boardNames}
         </select>
         <button
-          onClick={this.handleSelectBoard}> Select </button>
+          onClick={this.handleSelectBoard}> View </button>
+      </div>
+    );
+  }
+}
+
+class NewBoard extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputValue: ""
+    };
+  }
+
+  handleCreateBoard = () => {
+    if (this.state.inputValue.trim().length) {
+      this.props.handleCreateBoard(this.state.inputValue);
+    }
+    this.setState({
+      inputValue: ""
+    });
+  }
+
+  render() {
+    return (
+      <div className="newBoard">
+        <input
+          placeholder="Name board here..."
+          value={this.state.inputValue}
+          onChange={e => this.setState({
+            inputValue: e.target.value})} />
+        <button
+          onClick={this.handleCreateBoard}> Create Board </button>
       </div>
     );
   }
@@ -253,93 +272,10 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      boardNames: [],
       currentBoard: null,
       currentBoardNum: null,
-      boards: [[[
-      {
-       task: "firstBoard firstList: test",
-       boardNum: 0,
-       listNum: 0,
-       taskNum: 0,
-       isComplete: false
-      },
-      {
-        task: "test1",
-        boardNum: 0,
-        listNum: 0,
-        taskNum: 1,
-        isComplete: false
-      }],
-      [{
-       task: "firstBoard secondList: test2",
-       boardNum: 0,
-       listNum: 1,
-       taskNum: 0,
-       isComplete: false
-      },
-      {
-        task: "test3",
-        boardNum: 0,
-        listNum: 1,
-        taskNum: 1,
-        isComplete: false
-      }]],
-      [[{
-       task: "secondBoard firstList: test4",
-       boardNum: 0,
-       listNum: 1,
-       taskNum: 0,
-       isComplete: false
-      },
-      {
-        task: "test5",
-        boardNum: 0,
-        listNum: 1,
-        taskNum: 1,
-        isComplete: false
-      }],
-      [{
-       task: "secondBoard secondList: test5",
-       boardNum: 0,
-       listNum: 1,
-       taskNum: 0,
-       isComplete: false
-      },
-      {
-        task: "test6",
-        boardNum: 0,
-        listNum: 1,
-        taskNum: 1,
-        isComplete: false
-      }]],
-      [[{
-       task: "thirdBoard firstList: test4",
-       boardNum: 0,
-       listNum: 1,
-       taskNum: 0,
-       isComplete: false
-      },
-      {
-        task: "test5",
-        boardNum: 0,
-        listNum: 1,
-        taskNum: 1,
-        isComplete: false
-      }],
-      [{
-       task: "thirdBoard secondList: test5",
-       boardNum: 0,
-       listNum: 1,
-       taskNum: 0,
-       isComplete: false
-      },
-      {
-        task: "test6",
-        boardNum: 0,
-        listNum: 1,
-        taskNum: 1,
-        isComplete: false
-      }]]],
+      boards: [],
       view: 0,
     };
   }
@@ -359,7 +295,9 @@ class App extends React.Component {
     });
   }
 
-  selectBoard = (index) => {
+  selectBoard = (boardName) => {
+    let boardNames = this.state.boardNames.slice();
+    let index = boardNames.indexOf(boardName);
     if (index === -1) {
       return null;
     } else {
@@ -369,7 +307,7 @@ class App extends React.Component {
           currentBoardNum: index,
           currentBoard: updatedCurrentBoard
         });
-      }
+    }
   }
 
   newList = (boardNum) => {
@@ -388,8 +326,33 @@ class App extends React.Component {
     });
   }
 
+  createBoard = (boardName) => {
+    let updatedBoards = this.state.boards.slice();
+    updatedBoards.push([]);
+
+    let duplicate = false;
+    let boardNames = this.state.boardNames.slice();
+    for (var i = 0; i < boardNames.length; i++) {
+      if (boardName === boardNames[i]) {
+        duplicate = true;
+        break;
+      }
+    }
+
+    if (duplicate === false) {
+      let updatedBoardNames = this.state.boardNames.slice();
+      updatedBoardNames.push(boardName);
+      this.setState({
+        boards: updatedBoards,
+        boardNames: updatedBoardNames
+      });
+    } else alert("Internet Wizard says: please use another name.");
+  }
+
   render() {
-    console.log(this.state);
+    console.log(this.state.boardNames.length);
+    console.log(this.state.boardNames);
+    // console.log(this.state);
     let currentBoard = [];
     const board = <Board
                     boardNum={this.state.currentBoardNum}
@@ -402,11 +365,14 @@ class App extends React.Component {
     if (this.state.currentBoard === null) {
       currentBoard = null;
     } else { currentBoard = board; }
+
     return (
       <div className="app">
-        <NewBoard />
+        <NewBoard
+          handleCreateBoard={this.createBoard}/>
         <BoardSelect
-          handleSelectBoard={this.selectBoard} /> <br />
+          handleSelectBoard={this.selectBoard}
+          boardNames={this.state.boardNames} /> <br />
           {currentBoard}
       </div>
     );
